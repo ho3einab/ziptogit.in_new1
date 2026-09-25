@@ -102,7 +102,8 @@ class CapsuleOverlayService : LifecycleService() {
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+            gravity = Gravity.TOP or Gravity.START
+            x = 0
             y = dpToPx(12)
         }
 
@@ -120,17 +121,43 @@ class CapsuleOverlayService : LifecycleService() {
         val cutout = insets.displayCutout ?: return
         val holeRect = cutout.boundingRects.firstOrNull() ?: return
 
+        val holeCenterX = holeRect.left + holeRect.width() / 2
         val holeCenterY = holeRect.top + holeRect.height() / 2
-        val pillHeight = capsuleView.height.takeIf { it > 0 } ?: dpToPx(32)
+        val viewHeight = capsuleView.height.takeIf { it > 0 } ?: dpToPx(32)
+        val viewWidth = capsuleView.width.takeIf { it > 0 } ?: dpToPx(90)
 
-        layoutParams.y = (holeCenterY - pillHeight / 2).coerceAtLeast(dpToPx(4))
+        layoutParams.y = (holeCenterY - viewHeight / 2).coerceAtLeast(dpToPx(4))
+
+        val screenWidth = resources.displayMetrics.widthPixels
+        val hasLabelContent = expansionState == CapsuleExpansionState.COLLAPSED &&
+            app.stateManager.activeContent.value !is CapsuleContent.Idle
+
+        layoutParams.x = when {
+            expansionState == CapsuleExpansionState.EXPANDED ->
+                (screenWidth - viewWidth) / 2
+            hasLabelContent -> {
+                val iconCenterOffsetFromLeft = dpToPx(19)
+                holeCenterX - iconCenterOffsetFromLeft
+            }
+            else -> (screenWidth - viewWidth) / 2
+        }
+
         runCatching { windowManager.updateViewLayout(capsuleView, layoutParams) }
     }
+
+    private var lastHadLabelContent = false
 
     private fun observeState() {
         lifecycleScope.launch {
             app.stateManager.activeContent.collect { content ->
                 capsuleView.render(content, expansionState)
+
+                val hasLabelContent = expansionState == CapsuleExpansionState.COLLAPSED &&
+                    content !is CapsuleContent.Idle
+                if (hasLabelContent != lastHadLabelContent) {
+                    lastHadLabelContent = hasLabelContent
+                    capsuleView.post { positionAroundCutout() }
+                }
             }
         }
     }
