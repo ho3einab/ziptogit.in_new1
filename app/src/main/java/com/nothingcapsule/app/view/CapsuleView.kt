@@ -46,6 +46,7 @@ class CapsuleView @JvmOverloads constructor(
         expandedRoot = findViewById(R.id.capsule_expanded_root)
         expandedTitle = findViewById(R.id.capsule_expanded_title)
         expandedSubtitle = findViewById(R.id.capsule_expanded_subtitle)
+        override fun onDown(e: MotionEvent): Boolean = true
     }
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
