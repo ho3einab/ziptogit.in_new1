@@ -50,8 +50,6 @@ class CapsuleView @JvmOverloads constructor(
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            onTap?.invoke()
-            return true
         }
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
