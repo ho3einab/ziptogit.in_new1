@@ -29,20 +29,6 @@ import com.nothingcapsule.app.model.CapsuleExpansionState
 import com.nothingcapsule.app.view.CapsuleView
 import kotlinx.coroutines.launch
 
-/**
- * The actual system-wide overlay window. Lives as a foreground service so
- * Android doesn't kill it while the screen is off or the app is backgrounded.
- *
- * IMPORTANT — things that only get verified on a real device / emulator with
- * a matching cutout, listed here so nothing is quietly assumed to "just work":
- *  - Exact pixel offset of the Nothing Phone (2a) punch-hole. This service reads
- *    it live from `WindowInsets.displayCutout` rather than hardcoding a value,
- *    which is the only reliable approach since Nothing hasn't published fixed
- *    cutout coordinates and screen density/resolution affects the raw pixels.
- *  - Touch-through behavior: FLAG_NOT_TOUCH_MODAL + a tightly sized layout is
- *    used so taps outside the pill fall through to whatever app is underneath.
- *    Some OEM launchers are stricter about this above Android 12; test on Nothing OS.
- */
 class CapsuleOverlayService : LifecycleService() {
 
     private lateinit var windowManager: WindowManager
@@ -117,7 +103,6 @@ class CapsuleOverlayService : LifecycleService() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-            // A safe default; refined once we can read the real cutout below.
             y = dpToPx(12)
         }
 
@@ -130,11 +115,6 @@ class CapsuleOverlayService : LifecycleService() {
         capsuleView.post { positionAroundCutout() }
     }
 
-    /**
-     * Reads the live [android.view.DisplayCutout] and nudges the pill so its
-     * vertical center lines up with the punch-hole's vertical center, with a
-     * few dp of breathing room on either side of the camera itself.
-     */
     private fun positionAroundCutout() {
         val insets = capsuleView.rootWindowInsets ?: return
         val cutout = insets.displayCutout ?: return
@@ -151,7 +131,6 @@ class CapsuleOverlayService : LifecycleService() {
         lifecycleScope.launch {
             app.stateManager.activeContent.collect { content ->
                 capsuleView.render(content, expansionState)
-                capsuleView.post { positionAroundCutout() }
             }
         }
     }
@@ -162,10 +141,6 @@ class CapsuleOverlayService : LifecycleService() {
             lowBatteryThreshold = prefs.lowBatteryThreshold,
             onUpdate = { app.stateManager.updateBattery(it) }
         ).also { it.start() }
-
-        // Music needs notification-listener access; CapsuleNotificationListener calls
-        // onNotificationAccessGranted() once it's actually bound, which is when we
-        // actually start querying media sessions (see below).
     }
 
     private fun toggleExpansion() {
@@ -222,7 +197,6 @@ class CapsuleOverlayService : LifecycleService() {
         timerManager.cancel()
     }
 
-    /** Called once [CapsuleNotificationListener] confirms it's actually bound. */
     fun attachMusicManager() = musicManager.start()
 
     override fun onBind(intent: Intent): IBinder? {
@@ -231,7 +205,6 @@ class CapsuleOverlayService : LifecycleService() {
     }
 
     companion object {
-        /** Weak-ish reference so the notification listener can reach the running service. */
         private var instance: CapsuleOverlayService? = null
 
         private const val NOTIFICATION_ID = 1001
@@ -273,9 +246,8 @@ class CapsuleOverlayService : LifecycleService() {
             ContextCompat.startForegroundService(context, intent)
         }
 
-        /** Called by [CapsuleNotificationListener.onListenerConnected]. */
         fun onNotificationAccessGranted(context: Context) {
-            instance?.attachMusicManager() ?: start(context) // ensure the service is up at all
+            instance?.attachMusicManager() ?: start(context)
         }
     }
 }
