@@ -6,12 +6,6 @@ import com.nothingcapsule.app.CapsuleApplication
 import com.nothingcapsule.app.CapsulePrefs
 import com.nothingcapsule.app.model.CapsuleContent
 
-/**
- * Two jobs in one service, because Android only grants active-media-session
- * access to components that are ALSO a bound NotificationListenerService:
- *   1. Tell [MusicManager] "a listener is bound now, go fetch active sessions".
- *   2. Forward whitelisted-app notifications into the capsule.
- */
 class CapsuleNotificationListener : NotificationListenerService() {
 
     private val app get() = application as CapsuleApplication
@@ -24,12 +18,14 @@ class CapsuleNotificationListener : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val pkg = sbn.packageName
-        if (pkg == packageName) return // ignore our own capsule notification
+        if (pkg == packageName) return
         if (pkg !in prefs.whitelistedApps) return
 
         val extras = sbn.notification.extras
         val title = extras.getCharSequence("android.title")?.toString() ?: return
-        val text = extras.getCharSequence("android.text")?.toString() ?: ""
+        val text = extras.getCharSequence("android.text")?.toString()
+            ?: extras.getCharSequence("android.bigText")?.toString()
+            ?: ""
 
         app.stateManager.updateNotification(
             CapsuleContent.Notification(
