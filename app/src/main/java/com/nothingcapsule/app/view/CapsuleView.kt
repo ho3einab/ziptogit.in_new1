@@ -14,11 +14,6 @@ import com.nothingcapsule.app.model.CapsuleContent
 import com.nothingcapsule.app.model.CapsuleExpansionState
 import kotlin.math.abs
 
-/**
- * Root view added directly to the WindowManager. Two child layouts are
- * inflated once and toggled with visibility rather than re-inflating on every
- * state change, to keep the collapse/expand transition cheap and jank-free.
- */
 class CapsuleView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
@@ -27,10 +22,6 @@ class CapsuleView @JvmOverloads constructor(
     var onTap: (() -> Unit)? = null
     var onSwipeDismiss: (() -> Unit)? = null
 
-    // This view is always inflated FROM capsule_mini.xml, where it is itself the
-    // root tag (<com.nothingcapsule.app.view.CapsuleView>) wrapping the two child
-    // panels below as inline XML — so we grab references in onFinishInflate(),
-    // once the XML-declared children actually exist, not in the constructor.
     private lateinit var miniIcon: ImageView
     private lateinit var miniLabel: TextView
     private lateinit var miniProgress: ProgressBar
@@ -46,11 +37,14 @@ class CapsuleView @JvmOverloads constructor(
         expandedRoot = findViewById(R.id.capsule_expanded_root)
         expandedTitle = findViewById(R.id.capsule_expanded_title)
         expandedSubtitle = findViewById(R.id.capsule_expanded_subtitle)
-        override fun onDown(e: MotionEvent): Boolean = true
     }
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+        override fun onDown(e: MotionEvent): Boolean = true
+
         override fun onSingleTapUp(e: MotionEvent): Boolean {
+            onTap?.invoke()
+            return true
         }
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
@@ -111,7 +105,6 @@ class CapsuleView @JvmOverloads constructor(
                 expandedSubtitle.text = content.text
             }
             CapsuleContent.Idle -> {
-                // Nothing to show — collapse to the smallest possible dot, no label.
                 miniIcon.setImageResource(R.drawable.ic_capsule_dot)
                 miniLabel.text = ""
                 miniProgress.visibility = GONE
@@ -119,6 +112,32 @@ class CapsuleView @JvmOverloads constructor(
                 expandedSubtitle.text = ""
             }
         }
+    }
+
+    fun hideIntoCutout(pivotXPx: Float) {
+        pivotX = pivotXPx
+        pivotY = height / 2f
+        animate()
+            .scaleX(0.05f)
+            .scaleY(0.05f)
+            .alpha(0f)
+            .setDuration(220L)
+            .start()
+    }
+
+    fun revealFromCutout(pivotXPx: Float) {
+        pivotX = pivotXPx
+        pivotY = height / 2f
+        scaleX = 0.05f
+        scaleY = 0.05f
+        alpha = 0f
+        visibility = VISIBLE
+        animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .alpha(1f)
+            .setDuration(220L)
+            .start()
     }
 
     private fun formatMillis(ms: Long): String {
