@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/brand_black">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <include layout="@layout/permission_row" android:id="@+id/row_overlay" />
+        <include layout="@layout/permission_row" android:id="@+id/row_notification_listener" />
+        <include layout="@layout/permission_row" android:id="@+id/row_post_notification" />
+        <include layout="@layout/permission_row" android:id="@+id/row_phone_state" />
+
+    </LinearLayout>
+</ScrollView>

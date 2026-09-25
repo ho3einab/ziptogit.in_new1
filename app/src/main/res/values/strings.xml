@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mini Capsule</string>
+    <string name="capsule_icon_description">Status</string>
+    <string name="capsule_running_title">Mini Capsule is running</string>
+    <string name="capsule_service_channel_name">Capsule background service</string>
+    <string name="battery_title">Battery</string>
+
+    <string name="permission_overlay_title">Draw over other apps</string>
+    <string name="permission_overlay_desc">The capsule needs this to sit on top of your screen, right around the camera cutout.</string>
+    <string name="permission_notification_title">Notification access</string>
+    <string name="permission_notification_desc">Needed to read now-playing info and any notifications you choose to allow through.</string>
+    <string name="permission_post_notification_title">Show notifications</string>
+    <string name="permission_post_notification_desc">Android requires a tiny background notification to keep the capsule alive.</string>
+    <string name="permission_phone_state_title">Phone state</string>
+    <string name="permission_phone_state_desc">Lets the capsule show incoming calls.</string>
+    <string name="grant_button">Grant</string>
+    <string name="enable_capsule">Enable Mini Capsule</string>
+    <string name="disable_capsule">Disable Mini Capsule</string>
+</resources>

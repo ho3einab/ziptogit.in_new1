@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.nothingcapsule.app.view.CapsuleView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/capsule_root"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <!-- Collapsed pill: hugs the punch-hole, minimal footprint -->
+    <LinearLayout
+        android:id="@+id/capsule_mini_root"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_gravity="center"
+        android:background="@drawable/capsule_pill_background"
+        android:gravity="center_vertical"
+        android:minWidth="90dp"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingEnd="14dp">
+
+        <ImageView
+            android:id="@+id/capsule_icon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@string/capsule_icon_description"
+            android:src="@drawable/ic_capsule_dot"
+            android:tint="@color/capsule_on_surface" />
+
+        <TextView
+            android:id="@+id/capsule_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:ellipsize="marquee"
+            android:fontFamily="monospace"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textColor="@color/capsule_on_surface"
+            android:textSize="12sp" />
+
+        <ProgressBar
+            android:id="@+id/capsule_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_marginStart="8dp"
+            android:max="100"
+            android:progressTint="@color/capsule_accent"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Expanded control panel -->
+    <LinearLayout
+        android:id="@+id/capsule_expanded_root"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/capsule_expanded_background"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/capsule_expanded_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/capsule_on_surface"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/capsule_expanded_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textColor="@color/capsule_on_surface_muted"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:id="@+id/capsule_controls_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/control_prev"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_skip_previous"
+                android:tint="@color/capsule_on_surface" />
+
+            <ImageView
+                android:id="@+id/control_play_pause"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="12dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_play"
+                android:tint="@color/capsule_accent" />
+
+            <ImageView
+                android:id="@+id/control_next"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_skip_next"
+                android:tint="@color/capsule_on_surface" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.nothingcapsule.app.view.CapsuleView>

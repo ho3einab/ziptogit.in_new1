@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.NothingCapsule" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand_black</item>
+        <item name="colorPrimaryDark">@color/brand_black</item>
+        <item name="colorAccent">@color/capsule_accent</item>
+        <item name="android:windowBackground">@color/brand_black</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/brand_black</item>
+    </style>
+</resources>

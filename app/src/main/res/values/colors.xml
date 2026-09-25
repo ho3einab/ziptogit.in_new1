@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="capsule_surface">#F2000000</color>
+    <color name="capsule_on_surface">#FFFFFFFF</color>
+    <color name="capsule_on_surface_muted">#B3FFFFFF</color>
+    <!-- Nothing's signature red, used sparingly as the single accent -->
+    <color name="capsule_accent">#FFD41C1C</color>
+
+    <color name="brand_black">#FF000000</color>
+    <color name="brand_white">#FFFFFFFF</color>
+</resources>
