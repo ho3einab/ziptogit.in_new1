@@ -27,6 +27,8 @@ import com.nothingcapsule.app.manager.TimerManager
 import com.nothingcapsule.app.model.CapsuleContent
 import com.nothingcapsule.app.model.CapsuleExpansionState
 import com.nothingcapsule.app.view.CapsuleView
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class CapsuleOverlayService : LifecycleService() {
@@ -49,6 +51,10 @@ class CapsuleOverlayService : LifecycleService() {
     )
 
     private var expansionState = CapsuleExpansionState.COLLAPSED
+
+    private var isCapsuleHidden = false
+    private var autoHideJob: Job? = null
+    private val autoHideDelayMs = 3000L
 
     override fun onCreate() {
         super.onCreate()
@@ -150,6 +156,23 @@ class CapsuleOverlayService : LifecycleService() {
     private fun observeState() {
         lifecycleScope.launch {
             app.stateManager.activeContent.collect { content ->
+                val isIdleAndCollapsed = content is CapsuleContent.Idle &&
+                    expansionState == CapsuleExpansionState.COLLAPSED
+
+                if (isIdleAndCollapsed) {
+                    if (autoHideJob == null && !isCapsuleHidden) {
+                        autoHideJob = lifecycleScope.launch {
+                            delay(autoHideDelayMs)
+                            hideCapsule()
+                            autoHideJob = null
+                        }
+                    }
+                } else {
+                    autoHideJob?.cancel()
+                    autoHideJob = null
+                    if (isCapsuleHidden) revealCapsule()
+                }
+
                 capsuleView.render(content, expansionState)
 
                 val hasLabelContent = expansionState == CapsuleExpansionState.COLLAPSED &&
@@ -171,6 +194,10 @@ class CapsuleOverlayService : LifecycleService() {
     }
 
     private fun toggleExpansion() {
+        if (isCapsuleHidden) {
+            revealCapsule()
+            return
+        }
         expansionState = if (expansionState == CapsuleExpansionState.COLLAPSED) {
             CapsuleExpansionState.EXPANDED
         } else {
@@ -178,6 +205,24 @@ class CapsuleOverlayService : LifecycleService() {
         }
         capsuleView.render(app.stateManager.activeContent.value, expansionState)
         capsuleView.post { positionAroundCutout() }
+    }
+
+    private fun iconPivotPx(): Float = dpToPx(19).toFloat()
+
+    private fun hideCapsule() {
+        if (isCapsuleHidden) return
+        isCapsuleHidden = true
+        layoutParams.flags = layoutParams.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        runCatching { windowManager.updateViewLayout(capsuleView, layoutParams) }
+        capsuleView.hideIntoCutout(iconPivotPx())
+    }
+
+    private fun revealCapsule() {
+        if (!isCapsuleHidden) return
+        isCapsuleHidden = false
+        layoutParams.flags = layoutParams.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+        runCatching { windowManager.updateViewLayout(capsuleView, layoutParams) }
+        capsuleView.revealFromCutout(iconPivotPx())
     }
 
     private fun collapseAndHideTransient() {
@@ -218,6 +263,7 @@ class CapsuleOverlayService : LifecycleService() {
     override fun onDestroy() {
         super.onDestroy()
         if (instance == this) instance = null
+        autoHideJob?.cancel()
         if (isAdded) runCatching { windowManager.removeView(capsuleView) }
         musicManager.stop()
         batteryMonitor?.stop()
